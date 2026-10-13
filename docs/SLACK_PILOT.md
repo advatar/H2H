@@ -14,6 +14,8 @@ This repo includes a **working Slack Bolt Socket Mode app** implementation. It h
        npm test
        npm run slack
 
+   To run a full **synthetic** approval and two-human interaction without tokens, use `npm run demo:h2h`. This is a deterministic mock, not a live Slack or Claude integration.
+
    Supply the tokens through the environment, ideally a secret manager. See [.env.example](../.env.example). Do not source a file containing untrusted shell text.
 
 6. In an allowed channel, select the **Create H2H Brief** message shortcut on a message containing actual conversation text, or on a link and paste a transcript excerpt in the form.
