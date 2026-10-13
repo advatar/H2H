@@ -37,6 +37,7 @@ Human A -> Personal Agent A -> H2H Brief -> A2A or MCP -> Personal Agent B -> Hu
 Requires Node.js 22 or newer; no runtime dependencies.
 
 ~~~sh
+npm install
 npm test
 npm run demo
 ~~~
