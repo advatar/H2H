@@ -10,7 +10,8 @@
   "scripts": {
     "test": "node --test",
     "demo": "node src/demo.js",
-    "slack": "node src/slack/app.js"
+    "slack": "node src/slack/app.js",
+    "demo:h2h": "node scripts/demo-two-humans.js"
   },
   "devDependencies": {
     "ajv": "^8.17.1",
