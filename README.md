@@ -41,6 +41,7 @@ Requires Node.js 22 or newer and a dependency install.
 npm install
 npm test
 npm run demo
+npm run demo:h2h  # synthetic Alice/Bob: one approved brief, two private mock assessments
 ~~~
 
 The demo uses fictional data and never posts to Slack. For the real Socket Mode Slack pilot, read [docs/SLACK_PILOT.md](docs/SLACK_PILOT.md), install the Slack manifest, set workspace credentials and channel allowlist, then run `npm run slack`. Bare Claude/ChatGPT links are not readable transcripts; author-supplied text is required.
