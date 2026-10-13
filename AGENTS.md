@@ -10,3 +10,12 @@ H2H is a human-authorized semantic protocol atop A2A; do not introduce a competi
 - No hardcoded credentials, private transcripts, customer data or unapproved API calls in examples/tests.
 - Node.js >=22; no dependencies in initial reference runtime. Test with npm test.
 - Distinguish **reference library** from a deployed/secured Slack, MCP or A2A service in docs and issue updates.
+
+## Slack pilot
+
+- Single-workspace Socket Mode; explicit allowlist of public, unshared channels.
+- Never add passive message subscriptions or extra Slack scopes without explicit review.
+- Author sees an exact brief before Publish; verify Slack membership at publish and recipient handoff.
+- No automatic retry of ambiguous Slack message posts.
+- Never log source text, secrets or personal-context output.
+- Run `npm test` after every change; do not claim a real workspace deployment until confirmed.

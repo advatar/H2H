@@ -1,0 +1,25 @@
+display_information:
+  name: H2H Pilot
+  description: Human-to-human knowledge briefs with private personal AI handoff
+  background_color: "#172554"
+features:
+  bot_user:
+    display_name: H2H
+    always_online: false
+  shortcuts:
+    - name: Create H2H Brief
+      type: message
+      callback_id: h2h_create_brief
+      description: Draft, review and post a brief from permitted text
+oauth_config:
+  scopes:
+    bot:
+      - commands
+      - chat:write
+      - channels:read
+settings:
+  interactivity:
+    is_enabled: true
+  socket_mode_enabled: true
+  org_deploy_enabled: false
+  token_rotation_enabled: false
