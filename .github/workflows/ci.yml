@@ -16,3 +16,4 @@ jobs:
       - run: npm install --ignore-scripts --no-audit --no-fund
       - run: npm test
       - run: npm run demo > /dev/null
+      - run: npm run demo:h2h > /dev/null
