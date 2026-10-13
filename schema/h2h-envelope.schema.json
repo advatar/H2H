@@ -152,7 +152,32 @@
           "type": "string",
           "format": "date-time"
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "forwarding": {
+                "const": "deny"
+              }
+            },
+            "required": [
+              "forwarding"
+            ]
+          },
+          "then": {
+            "properties": {
+              "permitted_operations": {
+                "not": {
+                  "contains": {
+                    "const": "forward"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "artifact": {
       "$ref": "#/$defs/artifact"
@@ -444,6 +469,91 @@
       "then": {
         "required": [
           "receipt"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "revoke"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "relation": {
+            "properties": {
+              "type": {
+                "const": "revokes"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "enum": [
+              "reply",
+              "reply_proposal"
+            ]
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "relation": {
+            "properties": {
+              "type": {
+                "const": "responds_to"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "not": {
+        "properties": {
+          "audience": {
+            "properties": {
+              "kind": {
+                "const": "channel"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "policy": {
+            "properties": {
+              "classification": {
+                "const": "direct"
+              }
+            },
+            "required": [
+              "classification"
+            ]
+          }
+        },
+        "required": [
+          "audience",
+          "policy"
         ]
       }
     }
