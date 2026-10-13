@@ -10,5 +10,9 @@
   "scripts": {
     "test": "node --test",
     "demo": "node src/demo.js"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
   }
 }
