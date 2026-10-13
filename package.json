@@ -1,0 +1,14 @@
+{
+  "name": "@advatar/h2h",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "H2H experimental contract, A2A binding and Slack preview reference",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test",
+    "demo": "node src/demo.js"
+  }
+}
