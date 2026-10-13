@@ -1,0 +1,66 @@
+{
+  "protocol": "h2h/0.1",
+  "message_id": "h2h-example-brief-001",
+  "thread_id": "slack-demo-thread-001",
+  "kind": "brief",
+  "sent_at": "2026-10-13T14:00:00Z",
+  "sender": {
+    "human_id": "demo:alice",
+    "agent_id": "demo:agent-alice"
+  },
+  "audience": {
+    "kind": "channel",
+    "ids": [
+      "slack:channel:DEMO"
+    ]
+  },
+  "intent": {
+    "type": "feedback",
+    "prompt": "Should we investigate this proposal?"
+  },
+  "policy": {
+    "classification": "workspace",
+    "permitted_operations": [
+      "read",
+      "private_interpret",
+      "draft_reply"
+    ],
+    "forwarding": "deny",
+    "grant_ref": "demo-grant-not-valid-production",
+    "expires_at": "2099-01-01T00:00:00Z"
+  },
+  "artifact": {
+    "summary": "Fictional example: a teammate proposes replacing batch updates with event-driven processing. The potential benefit is faster feedback, but delivery guarantees and operational costs have not been assessed.",
+    "claims": [
+      {
+        "id": "c1",
+        "text": "The proposal recommends event-driven processing.",
+        "basis": "source",
+        "evidence_refs": [
+          "s1"
+        ]
+      },
+      {
+        "id": "c2",
+        "text": "It could reduce latency.",
+        "basis": "inference",
+        "evidence_refs": []
+      }
+    ],
+    "questions": [
+      "Would a narrow pilot be worthwhile?"
+    ],
+    "limitations": [
+      "Fictional demonstration data; no independently verified performance measurements."
+    ],
+    "sources": [
+      {
+        "id": "s1",
+        "provider": "author-submitted-demo",
+        "uri": "urn:h2h:example:fictional-brief",
+        "coverage": "full",
+        "supplied_by": "human"
+      }
+    ]
+  }
+}

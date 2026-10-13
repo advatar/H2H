@@ -1,0 +1,42 @@
+{
+  "protocol": "h2h/0.1",
+  "message_id": "h2h-example-proposal-001",
+  "thread_id": "slack-demo-thread-001",
+  "kind": "reply_proposal",
+  "sent_at": "2026-10-13T14:00:00Z",
+  "sender": {
+    "human_id": "demo:bob",
+    "agent_id": "demo:agent-bob"
+  },
+  "audience": {
+    "kind": "humans",
+    "ids": [
+      "demo:bob"
+    ]
+  },
+  "intent": {
+    "type": "inform",
+    "prompt": "Review my draft privately before deciding whether to share."
+  },
+  "policy": {
+    "classification": "direct",
+    "permitted_operations": [
+      "read",
+      "private_interpret"
+    ],
+    "forwarding": "deny",
+    "grant_ref": "demo-private-grant",
+    "expires_at": "2099-01-01T00:00:00Z"
+  },
+  "artifact": {
+    "summary": "Draft only: I suggest testing a small event-driven path before changing the architecture.",
+    "sources": [],
+    "limitations": [
+      "Private proposed reply; not approved or published."
+    ]
+  },
+  "relation": {
+    "message_id": "h2h-example-brief-001",
+    "type": "responds_to"
+  }
+}
