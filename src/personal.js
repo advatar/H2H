@@ -10,8 +10,8 @@ export function personalInterpretationPrompt(envelope) {
   const data=JSON.stringify({
     h2h_message_id:envelope.message_id.slice(0,200),
     sender_intent:(envelope.intent.prompt ?? envelope.intent.type).slice(0,240),
-    brief:a.summary.slice(0,1300),
-    claims:(a.claims ?? []).slice(0,4).map(c=>({text:c.text.slice(0,160),basis:c.basis,evidence_refs:c.evidence_refs.slice(0,4).map(x=>x.slice(0,80))})),
+    brief:a.summary.slice(0,1100),
+    claims:(a.claims ?? []).slice(0,3).map(c=>({text:c.text.slice(0,160),basis:c.basis,evidence_refs:c.evidence_refs.slice(0,2).map(x=>x.slice(0,80))})),
     limitations:(a.limitations ?? []).slice(0,2).map(x=>x.slice(0,200))
   });
   const prompt=[
