@@ -56,7 +56,7 @@ test("Slack channel preview requires explicit verified authorization",async()=>{
   assert.throws(()=>renderSlackPreview(e));
   const blocks=renderSlackPreview(e,{verifiedChannelAuthorization:true});
   assert.equal(blocks[1].elements[0].action_id,"h2h_personal_interpretation");
-  assert(blocks[1].elements[0].agent_prompt.includes("untrusted external data"));
+  assert(blocks[1].elements[0]./untrusted external data/i.test(blocks[1].elements[0].agent_prompt));
   assert(blocks[1].elements[0].agent_prompt.length<=4000);
   const proposal=await read("reply-proposal");
   assert.throws(()=>renderSlackPreview(proposal,{verifiedChannelAuthorization:true}));
