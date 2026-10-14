@@ -50,6 +50,11 @@ test("JWT: issuer, exact audience, expiry and scope checked before identity mapp
       .setIssuer(iss).setAudience(aud).setSubject("bob").setIssuedAt().setExpirationTime(exp)
       .sign(pair.privateKey);
   const pass=await verify.verifyAccessToken(await sign());
+  const idToken=await new SignJWT({scope:"h2h:read",client_id:"test-client"})
+    .setProtectedHeader({alg:"RS256",typ:"JWT"})
+    .setIssuer(issuer).setAudience(audience).setSubject("bob")
+    .setIssuedAt().setExpirationTime("10m").sign(pair.privateKey);
+  await assert.rejects(verify.verifyAccessToken(idToken));
   const insufficient=await verify.verifyAccessToken(await sign({scope:"profile:read"}));
   assert(!insufficient.scopes.includes("h2h:read")); // OAuth gate responds 403 insufficient_scope
   assert.equal(pass.extra.subject,"bob");
@@ -62,6 +67,11 @@ test("JWT: issuer, exact audience, expiry and scope checked before identity mapp
   const forged=await new SignJWT({scope:"h2h:read"}).setProtectedHeader({alg:"RS256"})
     .setIssuer(issuer).setAudience(audience).setSubject("bob").setExpirationTime("10m").sign(evil.privateKey);
   await assert.rejects(verify.verifyAccessToken(forged));
+  const anonymousClient=await new SignJWT({scope:"h2h:read"})
+    .setProtectedHeader({alg:"RS256",typ:"at+jwt"})
+    .setIssuer(issuer).setAudience(audience).setSubject("bob")
+    .setIssuedAt().setExpirationTime("10m").sign(pair.privateKey);
+  await assert.rejects(verify.verifyAccessToken(anonymousClient));
 });
 test("issuer discovery is pinned to configured issuer and requires PKCE",async()=>{
   const metadata={
