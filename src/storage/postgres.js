@@ -149,9 +149,14 @@ export class PostgresPilotStore {
   async provisionPrincipal({issuer,subject,teamId,slackUserId}){
     if([issuer,subject,teamId,slackUserId].some(x=>!positiveText(x)))throw new TypeError("Explicit principal binding required");
     if(!/^T[A-Z0-9]+$/.test(teamId)||!/^[UW][A-Z0-9]+$/.test(slackUserId))throw new Error("Invalid Slack binding");
-    await this.pool.query(
-      "INSERT INTO h2h_principals(issuer,subject,team_id,slack_user_id) VALUES($1,$2,$3,$4) ON CONFLICT(issuer,subject) DO UPDATE SET team_id=EXCLUDED.team_id,slack_user_id=EXCLUDED.slack_user_id",
+    const result=await this.pool.query(
+      "INSERT INTO h2h_principals(issuer,subject,team_id,slack_user_id) VALUES($1,$2,$3,$4) ON CONFLICT(issuer,subject) DO NOTHING",
       [issuer,subject,teamId,slackUserId]);
+    if(result.rowCount===0){
+      const existing=await this.getPrincipalLink(issuer,subject);
+      if(!existing||existing.teamId!==teamId||existing.slackUserId!==slackUserId)throw new Error("Identity already linked to a different Slack account; explicit verified unlink required");
+      return;
+    }
     await this.pool.query("INSERT INTO h2h_audit(team_id,actor_id,action) VALUES($1,'operator','principal_linked')",[teamId]);
   }
 }
