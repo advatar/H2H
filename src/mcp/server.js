@@ -21,6 +21,7 @@ export function createBriefMcpHandler({store,slackClient,config}){
   return createMcpHandler(({authInfo})=>{
     const server=new McpServer({name:"advatar-h2h",version:"0.1.0"});
     const lookup=async messageId=>{
+      if(!authInfo?.scopes?.includes("h2h:read") || !Number.isInteger(authInfo.expiresAt) || authInfo.expiresAt<=Math.floor(Date.now()/1000))return null;
       const issuer=authInfo?.extra?.issuer;
       const subject=authInfo?.extra?.subject;
       if(typeof issuer!=="string"||typeof subject!=="string")return null;
