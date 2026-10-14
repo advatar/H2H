@@ -19,3 +19,11 @@ H2H is a human-authorized semantic protocol atop A2A; do not introduce a competi
 - No automatic retry of ambiguous Slack message posts.
 - Never log source text, secrets or personal-context output.
 - Run `npm test` after every change; do not claim a real workspace deployment until confirmed.
+
+## Durable pilot and MCP
+
+- Do not deploy without strict OAuth issuer/resource validation, linked Slack principal records and current Slack ACL rechecks.
+- Never equate OIDC subject text with a Slack user without administrator-verified mapping.
+- Use encrypted persistence and conditional database transitions for publish/revoke; no optimistic retries of ambiguous Slack posts.
+- MCP tools remain read-only; no auto-posting of personal assessments.
+- Keep the deployment guide's remaining operational/security gates explicit, even if unit tests pass.

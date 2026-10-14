@@ -182,3 +182,13 @@ test("ephemeral drafts expire and cannot be published later",async()=>{
   await h.publish({view:review});
   assert.equal(h.calls.posted.length,0);
 });
+
+test("Use Claude / ChatGPT always offers the permission-checked private handoff",async()=>{
+  const h=harness();
+  await h.shortcut();const review=await h.compose();await h.publish({view:review});
+  const messageId=h.calls.posted[0].blocks[1].elements[0].value;
+  assert(h.calls.posted[0].blocks[1].elements.some(x=>x.action_id==="h2h_copy_handoff"));
+  const modal=await h.action("h2h_copy_handoff",R,messageId);
+  assert.equal(modal.callback_id,"h2h_private_handoff");
+  assert(JSON.stringify(modal).includes(messageId));
+});

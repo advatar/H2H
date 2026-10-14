@@ -38,7 +38,7 @@ export function registerSlackPilot(app,{store,config,modelSummarizer=null,now=()
       if(shortcut?.trigger_id) await client.views.open({trigger_id:shortcut.trigger_id,view:finishedView("H2H is only enabled in specifically allowlisted public channels.")});
       return;
     }
-    const draft=store.open({teamId,userId,channelId,sourceTs,threadTs,selectedText:shortcut.message.text||""});
+    const draft=await store.open({teamId,userId,channelId,sourceTs,threadTs,selectedText:shortcut.message.text||""});
     try {
       await client.views.open({trigger_id:shortcut.trigger_id,
         view:draft.status==="compose"?composeView(draft,{aiConfigured:!!modelSummarizer}):
@@ -48,7 +48,7 @@ export function registerSlackPilot(app,{store,config,modelSummarizer=null,now=()
 
   app.view("h2h_compose",async({ack,body,view,client})=>{
     const {teamId,userId}=context(body);
-    const draft=store.get(modalDraftId(view),teamId,userId);
+    const draft=await store.get(modalDraftId(view),teamId,userId);
     if(!draft||draft.status!=="compose"){
       await ack({response_action:"update",view:finishedView("Draft expired or no longer available. Start the shortcut again.")});
       return;
@@ -64,7 +64,7 @@ export function registerSlackPilot(app,{store,config,modelSummarizer=null,now=()
       await ack({response_action:"errors",errors:{source:"Provide at least 60 characters of actual conversation text (maximum 50,000); a link alone is insufficient."}});
       return;
     }
-    store.startProcessing(draft,{text,consent:true});
+    await store.startProcessing(draft,{text,consent:true});
     await ack({response_action:"update",view:busyView(draft)});
     try {
       if(!await member(client,teamId,draft.channelId,userId)) throw new Error("Slack channel authorization denied");
@@ -74,10 +74,10 @@ export function registerSlackPilot(app,{store,config,modelSummarizer=null,now=()
         now:now(),modelSummarizer,
         sourceUrl:extractApprovedSourceLink(draft.selectedText)
       });
-      store.ready(draft,envelope);
+      await store.ready(draft,envelope);
       await client.views.update({view_id:view.id,view:reviewView(draft)});
     }catch {
-      store.failDraft(draft);
+      try{await store.failDraft(draft);}catch{/* database failure; do not post */}
       report(logger,"create preview");
       try{await client.views.update({view_id:view.id,view:finishedView("Unable to prepare a preview. No Slack message was posted.")});}catch{/* modal closed */}
     }
@@ -85,17 +85,17 @@ export function registerSlackPilot(app,{store,config,modelSummarizer=null,now=()
 
   app.view("h2h_publish",async({ack,body,view,client})=>{
     const {teamId,userId}=context(body);
-    const draft=store.get(modalDraftId(view),teamId,userId);
+    const draft=await store.get(modalDraftId(view),teamId,userId);
     let hash;
     try{hash=JSON.parse(view.private_metadata).hash;}catch{/* invalid metadata */}
-    if(!draft||!draft.envelope||!hash||!store.beginPublish(draft,hash)) {
+    if(!draft||!draft.envelope||!hash||!await store.beginPublish(draft,hash)) {
       await ack({response_action:"update",view:finishedView("Draft was published, expired or modified. No second post was made.")});
       return;
     }
     await ack({response_action:"update",view:busyView(draft,"Checking channel access and publishing your approved brief…")});
     try {
       if(!await member(client,teamId,draft.channelId,userId)) {
-        store.markAmbiguous(draft);
+        await store.markAmbiguous(draft);
         await client.views.update({view_id:view.id,view:finishedView("Slack access denied. Nothing was sent.")});
         return;
       }
@@ -110,21 +110,21 @@ export function registerSlackPilot(app,{store,config,modelSummarizer=null,now=()
         blocks,unfurl_links:false,unfurl_media:false
       });
       if(posted?.ok===false||!posted?.ts) throw new Error("Slack did not confirm post");
-      store.markPublished(draft,posted.ts);
+      await store.markPublished(draft,posted.ts);
       await client.views.update({view_id:view.id,view:finishedView("Published to your Slack thread. Other participants may interpret the brief privately.")});
     }catch {
       // The API might have accepted the post before connection failed. Never
       // retry automatically; a duplicate would be worse than an uncertain post.
-      store.markAmbiguous(draft);
+      try{await store.markAmbiguous(draft);}catch{/* store might be unavailable; never auto-retry */}
       report(logger,"publish ambiguous");
       try{await client.views.update({view_id:view.id,view:finishedView("Posting result uncertain. Check your Slack thread before starting again. No automatic retry.")});}catch{/* modal closed */}
     }
   });
 
-  app.action("h2h_personal_interpretation",async({ack,action,body,client})=>{
+  const handlePrivateHandoff=async({ack,action,body,client})=>{
     await ack();
     const {teamId,userId}=context(body);
-    const p=store.getPublished(action?.value);
+    const p=await store.getPublished(action?.value);
     const channelId=body?.channel?.id;
     if(!p||!userId||p.teamId!==teamId||p.channelId!==channelId||
       !await member(client,teamId,p.channelId,userId)) {
@@ -135,7 +135,7 @@ export function registerSlackPilot(app,{store,config,modelSummarizer=null,now=()
     }
     const decision=await authorizeOperation(p.envelope,{
       operation:"read",principalId:userId,
-      verifyGrant:({grantRef})=>grantRef===p.grantRef&&!!store.getPublished(p.messageId),
+      verifyGrant:async ({grantRef})=>grantRef===p.grantRef&&Boolean(await store.getPublished(p.messageId)),
       verifyAudience:({audience})=>audience.kind==="channel"&&audience.ids.length===1&&audience.ids[0]===p.channelId,
       verifySourceAccess:({sources})=>sources.some(s=>s.id==="submitted"&&s.coverage==="partial"&&s.supplied_by==="human")
     });
@@ -143,19 +143,21 @@ export function registerSlackPilot(app,{store,config,modelSummarizer=null,now=()
       await client.views.open({trigger_id:body.trigger_id,
         view:decision.allowed?privateHandoffView(p.envelope):finishedView("Brief access denied.")});
     }catch{report(logger,"open private handoff");}
-  });
+  };
+  app.action("h2h_personal_interpretation",handlePrivateHandoff);
+  app.action("h2h_copy_handoff",handlePrivateHandoff);
 
   app.action("h2h_retract",async({ack,action,body,client})=>{
     await ack();
     const {teamId,userId}=context(body);
-    const p=store.getPublished(action?.value);
+    const p=await store.getPublished(action?.value);
     if(!p||p.userId!==userId||p.teamId!==teamId||p.channelId!==body?.channel?.id||
       !await member(client,teamId,p.channelId,userId)) {
       if(body?.channel?.id&&userId) await publicMessage(client,body.channel.id,userId,"Only the original author may retract an accessible H2H brief.");
       return;
     }
     // Revocation blocks future in-process lookups even if the Slack update fails.
-    store.revoke(p.messageId,teamId,userId);
+    await store.revoke(p.messageId,teamId,userId);
     try {
       await client.chat.update({channel:p.channelId,ts:p.postTs,
         text:"H2H brief retracted by its author.",blocks:revokedBlocks()});

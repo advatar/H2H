@@ -30,7 +30,8 @@ export function renderSlackPreview(envelope, {verifiedChannelAuthorization=false
   return [
     {type:"section",text:{type:"mrkdwn",text:trim(parts.join("\n\n"),2900)}},
     {type:"actions",elements:[
-      {type:"button",text:{type:"plain_text",text:"Ask my AI"},action_id:"h2h_personal_interpretation",value:envelope.message_id,agent_prompt:personalInterpretationPrompt(envelope),agent_prompt_display:"Interpret this H2H brief for me"}
+      {type:"button",text:{type:"plain_text",text:"Ask my AI"},action_id:"h2h_personal_interpretation",value:envelope.message_id,agent_prompt:personalInterpretationPrompt(envelope),agent_prompt_display:"Interpret this H2H brief for me"},
+      {type:"button",text:{type:"plain_text",text:"Use Claude / ChatGPT"},action_id:"h2h_copy_handoff",value:envelope.message_id}
     ]}
   ];
 }
