@@ -14,18 +14,21 @@ export function createJwtAccessVerifier({issuer,audience,jwksUrl,verifyKey}){
   return {
     async verifyAccessToken(token) {
       try {
-        const {payload}=await jwtVerify(token,key,{
+        const {payload,protectedHeader}=await jwtVerify(token,key,{
           issuer:expectedIssuer,
           audience:resource.href,
           algorithms:["RS256","PS256","ES256"],
           clockTolerance:"5s"
         });
         if(typeof payload.sub!=="string"||!payload.sub||!Number.isInteger(payload.exp))throw new Error("JWT requires subject and exp");
+        // Require a signed RFC 9068 JWT *access token*, not a login ID token.
+        // This is intentionally stricter than generic OIDC ID token validation.
+        if(protectedHeader.typ?.toLowerCase()!=="at+jwt")throw new Error("JWT is not marked as an OAuth access token");
+        if(typeof payload.client_id!=="string"||!payload.client_id)throw new Error("JWT access token needs client_id");
         const scopes=parseScopes(payload.scope);
         // Scope enforcement belongs in the OAuth resource-server gate so missing scopes
         // return RFC 6750 403 insufficient_scope (rather than 401 invalid_token).
-        const clientId=typeof payload.client_id==="string"?payload.client_id:
-          typeof payload.azp==="string"?payload.azp:"h2h-oauth-client";
+        const clientId=payload.client_id;
         return {
           token,clientId,scopes,expiresAt:payload.exp,resource,
           extra:{issuer:expectedIssuer,subject:payload.sub}
