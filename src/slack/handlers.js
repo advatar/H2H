@@ -121,7 +121,7 @@ export function registerSlackPilot(app,{store,config,modelSummarizer=null,now=()
     }
   });
 
-  app.action("h2h_personal_interpretation",async({ack,action,body,client})=>{
+  const handlePrivateHandoff=async({ack,action,body,client})=>{
     await ack();
     const {teamId,userId}=context(body);
     const p=await store.getPublished(action?.value);
@@ -143,7 +143,9 @@ export function registerSlackPilot(app,{store,config,modelSummarizer=null,now=()
       await client.views.open({trigger_id:body.trigger_id,
         view:decision.allowed?privateHandoffView(p.envelope):finishedView("Brief access denied.")});
     }catch{report(logger,"open private handoff");}
-  });
+  };
+  app.action("h2h_personal_interpretation",handlePrivateHandoff);
+  app.action("h2h_copy_handoff",handlePrivateHandoff);
 
   app.action("h2h_retract",async({ack,action,body,client})=>{
     await ack();
