@@ -1,6 +1,6 @@
 # H2H Slack pilot — operator guide (experimental)
 
-This repo includes a **working Slack Bolt Socket Mode app** implementation. It has not been installed in your workspace, deployed on infrastructure, or approved for production use. This guide is for a single operator-controlled test workspace.
+This repo includes a **Slack Bolt Socket Mode app backed by encrypted PostgreSQL**. It has not been installed in your workspace, deployed on infrastructure, or approved for production use. This guide is for a single operator-controlled test workspace.
 
 ## Prerequisites and setup
 
@@ -16,7 +16,7 @@ This repo includes a **working Slack Bolt Socket Mode app** implementation. It h
 
    To run a full **synthetic** approval and two-human interaction without tokens, use `npm run demo:h2h`. This is a deterministic mock, not a live Slack or Claude integration.
 
-   Supply the tokens through the environment, ideally a secret manager. See [.env.example](../.env.example). Do not source a file containing untrusted shell text.
+   Before starting the live app, configure DATABASE_URL and H2H_ENCRYPTION_KEY and run npm run migrate. For remote databases, enable verified PostgreSQL TLS. See [deployment](DEPLOYMENT.md). Supply all secrets through a secret manager. See [.env.example](../.env.example). Do not source a file containing untrusted shell text.
 
 6. In an allowed channel, select the **Create H2H Brief** message shortcut on a message containing actual conversation text, or on a link and paste a transcript excerpt in the form.
 7. Confirm rights and, if an AI provider is configured, its processing; review the resulting H2H Brief, then click **Publish**. The app replies only in the selected message's existing thread.
@@ -45,9 +45,9 @@ Model-proposed source claims are labeled source-backed only when the *exact quot
 
 ## Important limitations / production gates
 
-This is a **single-process, in-memory** demonstration: drafts expire after 15 minutes, published lookup after 24 hours, restart loses the store, and there is no durable audit history or distributed idempotency. Slackbot may continue to show embedded prompt text already posted. After a network-ambiguous post, the app intentionally does **not** retry; a human must inspect the thread before restarting a draft. H2H does not yet provide a proper OAuth-protected remote MCP or complete A2A receiving service.
+The live app uses **encrypted PostgreSQL state**, with atomic publish transitions and a minimal durable operational audit (not tamper-proof). Drafts expire after 15 minutes and published lookup after 24 hours. The synthetic demo still uses an in-memory store. Slackbot may continue to show embedded prompt text already posted. After a network-ambiguous post, the app intentionally does **not** retry; a human must inspect the thread before restarting a draft. H2H does not yet provide a proper OAuth-protected remote MCP or complete A2A receiving service.
 
-No enterprise deployment until: durable and encrypted tenant storage, authenticated grants/authorization service, cross-process replay protection, observability and redacted audit, revocation propagation, key management, retention deletion lifecycle, privacy assessment/provider agreements, negative security tests and real Slack workspace installation review. See [Threat Model](THREAT_MODEL.md) and [Issue #12](https://github.com/advatar/H2H/issues/12).
+No enterprise deployment until: an independent security review, signed/independently verified human grants, complete cross-process Slack reconciliation, key rotation, rate limiting, operational incident response, provider privacy assessment, multi-tenant policy and actual workspace testing. An OAuth resource server with linked-user ACL checks has been added, but it has not been deployed or live-verified. See [Threat Model](THREAT_MODEL.md) and [Issue #12](https://github.com/advatar/H2H/issues/12).
 
 ## Operator acceptance checklist
 
