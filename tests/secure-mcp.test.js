@@ -104,11 +104,11 @@ test("MCP SDK v2 exposes two read-only tools, never grants unseen identity acces
   const handler=createBriefMcpHandler({store,slackClient:mockSlack([A,B,BOT]),config});
   const auth={clientId:"client-x",scopes:["h2h:read"],expiresAt:Math.floor(Date.now()/1000)+600,
     extra:{issuer,subject:"bob"},resource:new URL(audience)};
-  const call=async(method,params)=>{
+  const call=async(method,params,callerAuth=auth)=>{
     const request=new Request(audience,{method:"POST",headers:{
       "content-type":"application/json",accept:"application/json, text/event-stream"
     },body:JSON.stringify({jsonrpc:"2.0",id:1,method,params})});
-    const response=await handler.fetch(request,{authInfo:auth});
+    const response=await handler.fetch(request,{authInfo:callerAuth});
     const body=await response.text();
     assert.equal(response.ok,true,body);
     return body.startsWith("event:")?JSON.parse(body.split("data: ")[1]):JSON.parse(body);
@@ -122,5 +122,10 @@ test("MCP SDK v2 exposes two read-only tools, never grants unseen identity acces
     assert(ok.result.content[0].text.includes(env.artifact.summary));
     const missing=await call("tools/call",{name:"h2h_get_brief",arguments:{message_id:"unknown"}});
     assert.equal(missing.result.isError,true);
+    const insufficient=await call("tools/call",
+      {name:"h2h_get_brief",arguments:{message_id:env.message_id}},
+      {...auth,scopes:["profile:read"]});
+    assert.equal(insufficient.result.isError,true);
+    assert(!insufficient.result.content[0].text.includes(env.artifact.summary));
   }finally{await handler.close();}
 });
