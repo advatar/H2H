@@ -11,7 +11,7 @@ This document separates implemented library pieces from proposed deployable inte
 
 Exit: samples conform to schema; tests pass and wire extension behaves as declared.
 
-## P1 — Slack pilot (next)
+## P1 — Slack pilot (code in dependent PR, installation and security qualification outstanding)
 
 - Installable Slack Bolt app with message shortcut **Create H2H Brief** (opt-in first; avoid blanket channel scanning).
 - Author submits or explicitly authorizes a conversation excerpt. Only process what the app is allowed to read. Do not assume private shared links can be scraped.

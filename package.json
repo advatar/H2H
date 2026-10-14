@@ -3,16 +3,21 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "H2H experimental contract, A2A binding and Slack preview reference",
+  "description": "H2H semantic protocol, single-workspace Slack pilot and A2A reference",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
     "test": "node --test",
-    "demo": "node src/demo.js"
+    "demo": "node src/demo.js",
+    "slack": "node src/slack/app.js",
+    "demo:h2h": "node scripts/demo-two-humans.js"
   },
   "devDependencies": {
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1"
+  },
+  "dependencies": {
+    "@slack/bolt": "^5.1.0"
   }
 }

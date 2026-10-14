@@ -24,25 +24,27 @@ Human A -> Personal Agent A -> H2H Brief -> A2A or MCP -> Personal Agent B -> Hu
 
 ## Repository status
 
-**Draft H2H 0.1; reference code only. Not a deployed Slack app, production authorization service, MCP server, or A2A agent.** The initial implementation includes a JSON Schema, reference contract checks, A2A wrapping, safe Slack Block Kit preview generation, a local example and offline tests. Integration requires actual identities, consent verification, storage and OAuth.
+**Draft H2H 0.1 plus an installable, single-workspace Slack Bolt pilot.** The Slack implementation supports a message shortcut, explicit consent, review-to-publish, allowlisted public channels, Slackbot/private fallback handoff and retraction. It has NOT been installed or deployed, and it is NOT a production authorization service, OAuth MCP server or complete A2A agent.
 
 - [Protocol](spec/0.1/PROTOCOL.md)
 - [JSON Schema](schema/h2h-envelope.schema.json)
 - [Threat model](docs/THREAT_MODEL.md)
 - [Implementation roadmap](docs/ROADMAP.md)
 - [Illustrative brief](examples/brief.json)
+- [Slack pilot operator guide](docs/SLACK_PILOT.md)
 
 ## Try the reference implementation
 
-Requires Node.js 22 or newer; no runtime dependencies.
+Requires Node.js 22 or newer and a dependency install.
 
 ~~~sh
 npm install
 npm test
 npm run demo
+npm run demo:h2h  # synthetic Alice/Bob: one approved brief, two private mock assessments
 ~~~
 
-The demo uses a fictional, locally provided brief and prints an example A2A message plus a Slack preview. It never fetches Claude links or posts to Slack.
+The demo uses fictional data and never posts to Slack. For the real Socket Mode Slack pilot, read [docs/SLACK_PILOT.md](docs/SLACK_PILOT.md), install the Slack manifest, set workspace credentials and channel allowlist, then run `npm run slack`. Bare Claude/ChatGPT links are not readable transcripts; author-supplied text is required.
 
 ## Design principle
 
