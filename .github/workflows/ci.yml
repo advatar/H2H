@@ -1,15 +1,42 @@
-name: H2H reference conformance
+name: H2H conformance and service tests
 on:
   push:
     branches: [main, "feat/**"]
   pull_request:
 jobs:
-  node:
+  protocol-and-mcp:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install packages
+        run: |
+          set -o pipefail
+          npm install --ignore-scripts --no-audit --no-fund 2>&1 | tee install-output.txt
+      - name: Contract and MCP tests
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee test-output.txt
+      - run: npm run demo > /dev/null
+      - run: npm run demo:h2h > /dev/null
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: node-test-diagnostics
+          path: |
+            install-output.txt
+            test-output.txt
+          if-no-files-found: ignore
+  postgres:
     runs-on: ubuntu-latest
     permissions:
       contents: read
     services:
-      postgres:
+      database:
         image: postgres:16
         env:
           POSTGRES_DB: h2h_test
@@ -24,15 +51,27 @@ jobs:
           --health-retries 15
     env:
       DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/h2h_test
+      H2H_ENCRYPTION_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - run: npm install --ignore-scripts --no-audit --no-fund
-      - run: npm test
-      - run: npm run demo > /dev/null
-      - run: npm run demo:h2h > /dev/null
-      - run: npm run migrate
-        env:
-          H2H_ENCRYPTION_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      - name: Install packages
+        run: |
+          set -o pipefail
+          npm install --ignore-scripts --no-audit --no-fund 2>&1 | tee db-install-output.txt
+      - name: Live Postgres integration test
+        run: |
+          set -o pipefail
+          npm run test -- tests/postgres.test.js 2>&1 | tee db-test-output.txt
+      - name: SQL migration
+        run: npm run migrate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: postgres-test-diagnostics
+          path: |
+            db-install-output.txt
+            db-test-output.txt
+          if-no-files-found: ignore
