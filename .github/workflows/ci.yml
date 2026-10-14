@@ -17,6 +17,12 @@ jobs:
         run: |
           set -o pipefail
           npm install --ignore-scripts --no-audit --no-fund 2>&1 | tee install-output.txt
+      - name: Syntax check for new server entrypoints
+        run: |
+          node --check src/mcp/server.js
+          node --check src/storage/postgres.js
+          node --check src/slack/handlers.js
+          node --check src/ops/preflight.js
       - name: Contract and MCP tests
         run: |
           set -o pipefail

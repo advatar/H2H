@@ -20,7 +20,7 @@ This repo includes a **Slack Bolt Socket Mode app backed by encrypted PostgreSQL
 
 6. In an allowed channel, select the **Create H2H Brief** message shortcut on a message containing actual conversation text, or on a link and paste a transcript excerpt in the form.
 7. Confirm rights and, if an AI provider is configured, its processing; review the resulting H2H Brief, then click **Publish**. The app replies only in the selected message's existing thread.
-8. The **Ask my AI** button uses Slack's agent_prompt when Slackbot AI is available to the individual. Other recipients get a private copy-paste modal. Only the author can **Retract** the H2H post.
+8. The **Ask my AI** button uses Slack's agent_prompt when Slackbot AI is available to the individual. **Use Claude / ChatGPT** always offers a private copy-paste prompt after verifying current membership; it does not automatically open a recipient's existing Claude or ChatGPT conversation. Only the author can **Retract** the H2H post.
 
 ## Long-form inputs and source integrity
 

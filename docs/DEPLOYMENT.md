@@ -44,7 +44,9 @@ The development-only H2H_ALLOW_LOCAL_HTTP_MCP=true option permits a loopback HTT
     npm run slack   # separate Socket Mode process
     npm run mcp     # separate OAuth-protected resource service
 
-Until a dependency lockfile is generated and reviewed, installation is not reproducible byte-for-byte; operators should generate a lockfile on a networked development machine, review it, and commit it before production deployment. Then switch to npm ci.\n\nRun npm run prune on a scheduled job. Drafts expire after 15 minutes, shared records after 24 hours; minimal audit events have up to 30 days of retention subject to pruning. Backups have separate retention that the operator must enforce. Never expose Postgres directly to the internet.
+Until a dependency lockfile is generated and reviewed, installation is not reproducible byte-for-byte; operators should generate a lockfile on a networked development machine, review it, and commit it before production deployment. Then switch to npm ci.
+
+Run npm run prune on a scheduled job. Drafts expire after 15 minutes, shared records after 24 hours; minimal audit events have up to 30 days of retention subject to pruning. Backups have separate retention that the operator must enforce. Never expose Postgres directly to the internet.
 
 ## Verify identity mapping (operator-only)
 
@@ -63,6 +65,22 @@ The exact pair (issuer, subject) is linked to one Slack team/user. Never accept 
 Configure a Claude or ChatGPT client that supports remote custom MCP integration to use your HTTPS /mcp endpoint, sign in through the configured OAuth issuer, request the exact resource and scope h2h:read, and call h2h_get_brief with an authorized H2H message ID. The receiving assistant uses its own context; H2H does not impersonate a personal model or automatically acquire that model's memory. The h2h_prepare_private_assessment tool returns only a prompt for the recipient to interpret privately.
 
 Slackbot's agent_prompt is a separate Slack-native experience; the fallback is a private copy-paste modal. These are not the same as MCP authentication.
+
+
+## Operational preflight and containerized test deployment
+
+Static configuration checking (no network calls or secrets printed):
+
+    npm run doctor:slack
+    npm run doctor:mcp
+
+The included [Dockerfile](../Dockerfile) and [compose.yaml](../compose.yaml) run the Slack worker and OAuth-protected MCP process against an **operator-managed external TLS PostgreSQL instance and OAuth identity provider**. Put real configuration values in an untracked local .env file or a secret manager. Before starting, run the migrations with the same environment in a one-off container:
+
+    docker compose build
+    docker compose run --rm --no-deps slack npm run migrate
+    docker compose up -d
+
+The MCP container binds the upstream service only to the host's 127.0.0.1:3000, which requires an external HTTPS reverse proxy with Host header preservation. Do not publicly expose raw port 3000. The Dockerfile currently uses npm install without a lockfile; pin dependencies and the base image digest before a real production release. Encrypt and back up the Postgres database and key separately; the Compose file does **not** provision a secure database or IdP.
 
 ## Security review before broad deployment
 

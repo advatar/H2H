@@ -15,7 +15,9 @@
     "mcp": "node src/mcp/app.js",
     "migrate": "node src/storage/migrate.js",
     "prune": "node src/storage/prune.js",
-    "link:user": "node src/storage/provision-principal.js"
+    "link:user": "node src/storage/provision-principal.js",
+    "doctor:slack": "node src/ops/preflight.js slack",
+    "doctor:mcp": "node src/ops/preflight.js mcp"
   },
   "devDependencies": {
     "ajv": "^8.17.1",

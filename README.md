@@ -24,7 +24,7 @@ Human A -> Personal Agent A -> H2H Brief -> A2A or MCP -> Personal Agent B -> Hu
 
 ## Repository status
 
-**Draft H2H 0.1 with a durable Slack pilot and an OAuth-protected remote MCP read service.** The Slack implementation supports a message shortcut, explicit consent, review-to-publish, allowlisted public channels, Slackbot/private fallback handoff and retraction. It has NOT been installed or deployed, and it is NOT a production authorization service, OAuth MCP server or complete A2A agent.
+**Draft H2H 0.1 with a durable Slack pilot and an OAuth-protected remote MCP read service.** The Slack implementation supports a message shortcut, explicit consent, review-to-publish, allowlisted public channels, Slackbot/private fallback handoff and retraction. It has NOT been installed or deployed, and it is NOT a complete production authorization service or A2A agent. The MCP implementation requires external OAuth infrastructure and live validation.
 
 - [Protocol](spec/0.1/PROTOCOL.md)
 - [JSON Schema](schema/h2h-envelope.schema.json)
@@ -43,6 +43,8 @@ npm install
 npm test
 npm run demo
 npm run demo:h2h  # synthetic Alice/Bob, not real Slack/Claude
+npm run doctor:slack  # static configuration checks, no network
+npm run doctor:mcp    # static configuration checks, no network
 # With verified workspace credentials, Postgres and IdP: npm run slack / npm run mcp
 ~~~
 
