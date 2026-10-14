@@ -47,6 +47,11 @@ test("Postgres: encrypted drafts, transaction-safe publish, identity link, revok
     });
     assert.deepEqual(await thirdStore.getPrincipalLink("https://issuer.example","bob"),
       {teamId:"TTEST1",slackUserId:"UBOB123"});
+    await assert.rejects(thirdStore.provisionPrincipal({
+      issuer:"https://issuer.example",subject:"bob",teamId:"TTEST1",slackUserId:"UEVIL123"
+    }));
+    assert.deepEqual(await thirdStore.getPrincipalLink("https://issuer.example","bob"),
+      {teamId:"TTEST1",slackUserId:"UBOB123"});
     assert.equal(await store.revoke(env.message_id,"TTEST1","UBOB123"),null);
     assert(await store.getPublished(env.message_id));
     assert(await thirdStore.revoke(env.message_id,"TTEST1","UALICE1"));
