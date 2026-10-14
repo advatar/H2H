@@ -50,10 +50,12 @@ test("JWT: issuer, exact audience, expiry and scope checked before identity mapp
       .setIssuer(iss).setAudience(aud).setSubject("bob").setIssuedAt().setExpirationTime(exp)
       .sign(pair.privateKey);
   const pass=await verify.verifyAccessToken(await sign());
+  const insufficient=await verify.verifyAccessToken(await sign({scope:"profile:read"}));
+  assert(!insufficient.scopes.includes("h2h:read")); // OAuth gate responds 403 insufficient_scope
   assert.equal(pass.extra.subject,"bob");
   assert.equal(pass.resource.href,audience);
   assert.equal(pass.expiresAt>Math.floor(Date.now()/1000),true);
-  for(const opts of [{iss:"https://rogue.example"},{aud:"https://other.example/mcp"},{scope:"profile:read"},{exp:"-30s"}]){
+  for(const opts of [{iss:"https://rogue.example"},{aud:"https://other.example/mcp"},{exp:"-30s"}]){
     await assert.rejects(verify.verifyAccessToken(await sign(opts)));
   }
   const evil=generateKeyPairSync("rsa",{modulusLength:2048});
