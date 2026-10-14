@@ -38,13 +38,13 @@ The development-only H2H_ALLOW_LOCAL_HTTP_MCP=true option permits a loopback HTT
 
 ## Setup
 
-    npm ci
+    npm install --ignore-scripts --no-audit --no-fund
     npm run migrate
     npm test
     npm run slack   # separate Socket Mode process
     npm run mcp     # separate OAuth-protected resource service
 
-Run npm run prune on a scheduled job. Drafts expire after 15 minutes, shared records after 24 hours; minimal audit events have up to 30 days of retention subject to pruning. Backups have separate retention that the operator must enforce. Never expose Postgres directly to the internet.
+Until a dependency lockfile is generated and reviewed, installation is not reproducible byte-for-byte; operators should generate a lockfile on a networked development machine, review it, and commit it before production deployment. Then switch to npm ci.\n\nRun npm run prune on a scheduled job. Drafts expire after 15 minutes, shared records after 24 hours; minimal audit events have up to 30 days of retention subject to pruning. Backups have separate retention that the operator must enforce. Never expose Postgres directly to the internet.
 
 ## Verify identity mapping (operator-only)
 
