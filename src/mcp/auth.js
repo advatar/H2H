@@ -22,7 +22,8 @@ export function createJwtAccessVerifier({issuer,audience,jwksUrl,verifyKey}){
         });
         if(typeof payload.sub!=="string"||!payload.sub||!Number.isInteger(payload.exp))throw new Error("JWT requires subject and exp");
         const scopes=parseScopes(payload.scope);
-        if(!scopes.includes("h2h:read"))throw new Error("Required scope absent");
+        // Scope enforcement belongs in the OAuth resource-server gate so missing scopes
+        // return RFC 6750 403 insufficient_scope (rather than 401 invalid_token).
         const clientId=typeof payload.client_id==="string"?payload.client_id:
           typeof payload.azp==="string"?payload.azp:"h2h-oauth-client";
         return {
