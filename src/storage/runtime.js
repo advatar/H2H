@@ -9,6 +9,7 @@ export async function createDurableRuntime(env=process.env) {
   if(!["postgres:","postgresql:"].includes(u.protocol))throw new Error("DATABASE_URL must use PostgreSQL");
   const local=isLoopback(u.hostname);
   if(!local&&env.H2H_DB_TLS!=="true")throw new Error("Remote PostgreSQL requires H2H_DB_TLS=true");
+  if(!local&&u.searchParams.has("sslmode"))throw new Error("Remove sslmode from remote DATABASE_URL; H2H enforces TLS certificate verification itself");
   const ssl=!local?{
     rejectUnauthorized:true,
     ...(env.H2H_DB_CA_FILE?{ca:await readFile(env.H2H_DB_CA_FILE,"utf8")}:{})
